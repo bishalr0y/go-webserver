@@ -57,7 +57,7 @@ func createTodos(c *gin.Context) {
 
 	for _, todo := range todos {
 		err := db.Create(&todo)
-		if err != nil {
+		if err.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the todo", "todo": todo})
 			return
 		}
@@ -69,7 +69,7 @@ func createTodos(c *gin.Context) {
 func fetchAllTodos(c *gin.Context) {
 	var todos []Todo
 	err := db.Find(&todos)
-	if err != nil {
+	if err.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch all todos"})
 		return
 	}
@@ -79,17 +79,26 @@ func fetchAllTodos(c *gin.Context) {
 func fetchSingleTodo(c *gin.Context) {
 	var todo Todo
 	id := c.Params.ByName("id")
-	db.First(&todo, id)
+	err := db.First(&todo, id)
+	if err.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch the todo"})
+	}
 	c.JSON(200, todo)
 }
 
 func updateTodo(c *gin.Context) {
 	var todo Todo
 	id := c.Params.ByName("id")
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id paramter not found"})
+		return
+	}
+
 	db.First(&todo, id)
 	c.BindJSON(&todo)
 	err := db.Save(&todo)
-	if err != nil {
+	if err.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update the todo"})
 		return
 	}
@@ -98,9 +107,15 @@ func updateTodo(c *gin.Context) {
 
 func deleteTodo(c *gin.Context) {
 	id := c.Params.ByName("id")
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id paramter not found"})
+		return
+	}
+
 	var todo Todo
 	err := db.Where("id = ?", id).Delete(&todo)
-	if err != nil {
+	if err.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete the todo"})
 	}
 	c.JSON(200, gin.H{"id #" + id: "deleted"})
