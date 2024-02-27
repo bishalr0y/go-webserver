@@ -95,9 +95,14 @@ func updateTodo(c *gin.Context) {
 		return
 	}
 
-	db.First(&todo, id)
+	err := db.First(&todo, id)
+
+	if err.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to find todo with that id"})
+	}
+
 	c.BindJSON(&todo)
-	err := db.Save(&todo)
+	err = db.Save(&todo)
 	if err.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update the todo"})
 		return
