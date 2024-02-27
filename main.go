@@ -42,7 +42,11 @@ func main() {
 func createTodo(c *gin.Context) {
 	var todo Todo
 	c.BindJSON(&todo)
-	db.Create(&todo)
+	err := db.Create(&todo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the todo"})
+		return
+	}
 	c.JSON(200, todo)
 }
 
@@ -54,7 +58,7 @@ func createTodos(c *gin.Context) {
 	for _, todo := range todos {
 		err := db.Create(&todo)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the todos", "todo": todo})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the todo", "todo": todo})
 			return
 		}
 	}
@@ -64,7 +68,11 @@ func createTodos(c *gin.Context) {
 
 func fetchAllTodos(c *gin.Context) {
 	var todos []Todo
-	db.Find(&todos)
+	err := db.Find(&todos)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch all todos"})
+		return
+	}
 	c.JSON(200, todos)
 }
 
@@ -80,13 +88,20 @@ func updateTodo(c *gin.Context) {
 	id := c.Params.ByName("id")
 	db.First(&todo, id)
 	c.BindJSON(&todo)
-	db.Save(&todo)
+	err := db.Save(&todo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update the todo"})
+		return
+	}
 	c.JSON(200, todo)
 }
 
 func deleteTodo(c *gin.Context) {
 	id := c.Params.ByName("id")
 	var todo Todo
-	db.Where("id = ?", id).Delete(&todo)
+	err := db.Where("id = ?", id).Delete(&todo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete the todo"})
+	}
 	c.JSON(200, gin.H{"id #" + id: "deleted"})
 }
