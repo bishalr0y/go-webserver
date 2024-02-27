@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -51,7 +52,11 @@ func createTodos(c *gin.Context) {
 	fmt.Println(todos)
 
 	for _, todo := range todos {
-		db.Create(&todo)
+		err := db.Create(&todo)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the todos", "todo": todo})
+			return
+		}
 	}
 
 	c.JSON(200, todos)
