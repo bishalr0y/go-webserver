@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -31,6 +33,8 @@ func main() {
 	r.PUT("/todos/:id", updateTodo)
 	r.DELETE("/todos/:id", deleteTodo)
 
+	r.POST("/todos/multiple", createTodos)
+
 	r.Run(":8888")
 }
 
@@ -39,6 +43,18 @@ func createTodo(c *gin.Context) {
 	c.BindJSON(&todo)
 	db.Create(&todo)
 	c.JSON(200, todo)
+}
+
+func createTodos(c *gin.Context) {
+	var todos []Todo
+	c.BindJSON(&todos)
+	fmt.Println(todos)
+
+	for _, todo := range todos {
+		db.Create(&todo)
+	}
+
+	c.JSON(200, todos)
 }
 
 func fetchAllTodos(c *gin.Context) {
