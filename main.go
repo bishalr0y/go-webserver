@@ -99,6 +99,7 @@ func updateTodo(c *gin.Context) {
 
 	if err.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to find todo with that id"})
+		return
 	}
 
 	c.BindJSON(&todo)
