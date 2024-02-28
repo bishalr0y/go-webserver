@@ -5,24 +5,19 @@ import (
 	"net/http"
 
 	"github.com/bishalr0y/go_webserver/config"
+	"github.com/bishalr0y/go_webserver/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 var db *gorm.DB = config.ConnectToDb()
 
-type Todo struct {
-	gorm.Model
-	Title     string `json:"title"`
-	Completed bool   `json:"completed"`
-}
-
 func HelloWorld() {
 	fmt.Println("Hello world from controller")
 }
 
 func CreateTodo(c *gin.Context) {
-	var todo Todo
+	var todo models.Todo
 	c.BindJSON(&todo)
 	err := db.Create(&todo)
 	if err.Error != nil {
@@ -33,7 +28,7 @@ func CreateTodo(c *gin.Context) {
 }
 
 func CreateTodos(c *gin.Context) {
-	var todos []Todo
+	var todos []models.Todo
 	c.BindJSON(&todos)
 	fmt.Println(todos)
 
@@ -49,7 +44,7 @@ func CreateTodos(c *gin.Context) {
 }
 
 func FetchAllTodos(c *gin.Context) {
-	var todos []Todo
+	var todos []models.Todo
 	err := db.Find(&todos)
 	if err.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch all todos"})
@@ -59,7 +54,7 @@ func FetchAllTodos(c *gin.Context) {
 }
 
 func FetchSingleTodo(c *gin.Context) {
-	var todo Todo
+	var todo models.Todo
 	id := c.Params.ByName("id")
 	err := db.First(&todo, id)
 	if err.Error != nil {
@@ -69,7 +64,7 @@ func FetchSingleTodo(c *gin.Context) {
 }
 
 func UpdateTodo(c *gin.Context) {
-	var todo Todo
+	var todo models.Todo
 	id := c.Params.ByName("id")
 
 	if id == "" {
@@ -101,7 +96,7 @@ func DeleteTodo(c *gin.Context) {
 		return
 	}
 
-	var todo Todo
+	var todo models.Todo
 	err := db.Where("id = ?", id).Delete(&todo)
 	if err.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete the todo"})
