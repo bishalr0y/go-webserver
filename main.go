@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/bishalr0y/go_webserver/config"
+	"github.com/bishalr0y/go_webserver/controller"
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -16,18 +17,20 @@ type Todo struct {
 }
 
 var db *gorm.DB
-var err error
+
+// var err error
 
 func main() {
-	// dsn := "postgresql://admin:admin@localhost:5432/my_db?schema=public"
-	dsn := "user=admin password=admin dbname=my_db port=5432 sslmode=disable TimeZone=Asia/Kolkata host=localhost"
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
+	// dsn := "user=admin password=admin dbname=my_db port=5432 sslmode=disable TimeZone=Asia/Kolkata host=localhost"
+	// db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// if err != nil {
+	// 	panic("failed to connect database")
+	// }
+	db = config.ConnectToDb()
 	db.AutoMigrate(&Todo{})
 
 	r := gin.Default()
+	controller.HelloWorld()
 	r.POST("/todos", createTodo)
 	r.GET("/todos", fetchAllTodos)
 	r.GET("/todos/:id", fetchSingleTodo)
