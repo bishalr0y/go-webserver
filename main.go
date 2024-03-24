@@ -11,6 +11,7 @@ import (
 var db *gorm.DB
 
 func main() {
+	// ! to add json validator
 	db = config.ConnectToDb()
 	db.AutoMigrate(&models.Todo{})
 
